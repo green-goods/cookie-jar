@@ -63,7 +63,7 @@ export function useJarCreation({
 	const { toast } = useToast();
 	const queryClient = useQueryClient();
 	const form = useForm<JarCreationFormData>({
-		resolver: zodResolver(jarCreationSchema as any),
+		resolver: zodResolver(jarCreationSchema),
 		defaultValues: {
 			...DEFAULT_CREATION_VALUES,
 			chainId: defaultChainId,
