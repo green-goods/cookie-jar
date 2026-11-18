@@ -2,10 +2,28 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { createRequire } = require("node:module");
-const { readFileSync } = require("node:fs");
+const { existsSync, readFileSync, realpathSync } = require("node:fs");
 const path = require("node:path");
-const rootRequire = createRequire(path.resolve("package.json"));
-const queryStringRequire = createRequire(rootRequire.resolve("query-string"));
+
+// Find a dependency's directory the way Node would from its dependent, without loading it
+// (several of these packages are ESM with export maps). Works for hoisted and isolated installs.
+function packageDir(name, fromDir) {
+	const lookup = createRequire(path.join(fromDir, "package.json")).resolve.paths(name);
+	for (const base of lookup) {
+		if (existsSync(path.join(base, name, "package.json"))) return realpathSync(path.join(base, name));
+	}
+	throw new Error(`${name} is not installed for ${fromDir}`);
+}
+
+// query-string@7 is reached through wagmi's WalletConnect connector.
+const queryStringDir = [
+	"wagmi",
+	"@wagmi/connectors",
+	"@walletconnect/ethereum-provider",
+	"@walletconnect/utils",
+	"query-string",
+].reduce((fromDir, name) => packageDir(name, fromDir), path.resolve("client"));
+const queryStringRequire = createRequire(path.join(queryStringDir, "package.json"));
 const decodeUriComponent = queryStringRequire("decode-uri-component");
 
 // Upstream v0.5.1 test.js cases, covering the fast path and the fallback decoder.
@@ -60,7 +78,7 @@ test("query-string uses the local security remediation through require()", () =>
 		readFileSync(path.resolve("vendor/decode-uri-component/index.js"), "utf8"),
 	);
 	assert.equal(typeof decodeUriComponent, "function");
-	const queryString = rootRequire("query-string");
+	const queryString = queryStringRequire(queryStringDir);
 	assert.deepEqual(
 		{ ...queryString.parse("?symKey=a%2Fb&relay-protocol=irn&bad=%C2%zz") },
 		{ symKey: "a/b", "relay-protocol": "irn", bad: "�%zz" },
