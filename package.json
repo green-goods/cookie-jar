@@ -72,7 +72,7 @@
 		"build:stipend": "bun run --cwd stipend build",
 		"test:stipend": "bash -c 'cd stipend && PATH=\"${PATH#*:}\" node node_modules/.bin/vitest run'",
 		"test:e2e:stipend": "playwright test --config=playwright.stipend.config.ts",
-		"test:dependency-security": "bash -c 'PATH=\"${PATH#*:}\" node --test vendor/braces/security.test.cjs'"
+		"test:dependency-security": "bash -c 'PATH=\"${PATH#*:}\" node --test vendor/braces/security.test.cjs vendor/decode-uri-component/security.test.cjs'"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.13.0",
@@ -85,7 +85,8 @@
 		"prettier": "^3.9.6",
 		"prettier-plugin-solidity": "^1.2.0",
 		"solhint": "^4.1.1",
-		"braces": "file:vendor/braces"
+		"braces": "file:vendor/braces",
+		"decode-uri-component": "file:vendor/decode-uri-component"
 	},
 	"engines": {
 		"node": ">=20",
@@ -104,6 +105,9 @@
 		"source-map-js": "1.2.2",
 		"tinypool": "2.2.0",
 		"sharp": "0.35.5",
+		"follow-redirects": "1.16.2",
+		"vite": "7.3.7",
+		"decode-uri-component": "file:vendor/decode-uri-component",
 		"braces": "file:vendor/braces"
 	},
 	"workspaces": [
